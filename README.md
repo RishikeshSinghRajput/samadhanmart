@@ -25,7 +25,7 @@ From a PowerShell terminal in `backend`:
 
 ```powershell
 ..\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+pip install -r requirements-local.txt
 $env:OTP_HASH_SECRET = (python -c "import secrets; print(secrets.token_urlsafe(48))")
 $env:SAMADHAN_EXPOSE_MOCK_OTP = "true"
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
@@ -68,14 +68,14 @@ Visit the Vite URL (normally `http://localhost:5173`). Set `VITE_API_URL` before
 
 ## 4. Deploy on Vercel
 
-The `backend` service uses `backend` as its root and `main:app` as its FastAPI entrypoint; Vercel installs dependencies from `backend/requirements.txt`. The `frontend` service builds the Vite app from `frontend`. Configure these environment variables in the Vercel project before deploying:
+The `backend` service uses `backend` as its root and `main:app` as its FastAPI entrypoint; Vercel installs dependencies from `backend/requirements.txt`. The Vercel requirements use a pure-Python SQL Server driver so the function does not require the system ODBC library. The `frontend` service builds the Vite app from `frontend`. Configure these environment variables in the Vercel project before deploying:
 
 - `OTP_HASH_SECRET`: a unique random value of at least 32 characters. Generate it locally with `python -c "import secrets; print(secrets.token_urlsafe(48))"`; do not commit it.
-- `SQLSERVER_CONNECTION_STRING`: a connection string for a SQL Server instance reachable from Vercel. The local Windows-authentication default is not suitable for Vercel; use a hosted database and an appropriate SQL login.
+- `DATABASE_URL`: a SQLAlchemy URL for a hosted SQL Server reachable from Vercel, using the `mssql+pytds` driver and SQL authentication. Do not use the local Windows-authentication default or commit credentials. Configure TLS according to the database provider's requirements.
 - `CORS_ORIGINS`: comma-separated deployed frontend origins when the frontend and API use different domains.
 - `VITE_API_URL`: the deployed API's `/api` URL when the frontend and API use different domains. Set this in the frontend's Vercel project before building.
 
-The API requires a hosted SQL Server and valid credentials to serve data. The API's `/api/health` endpoint checks application liveness only; it does not verify database connectivity. If Vercel still reports `FUNCTION_INVOCATION_FAILED`, inspect the deployment's Function Logs for the Python traceback: the generic error page does not identify whether startup failed due to a missing environment variable, dependency, or database driver.
+The API requires a hosted SQL Server, valid credentials, and network access from Vercel to serve data. The API's `/api/health` endpoint checks application liveness only; it does not verify database connectivity. If Vercel still reports `FUNCTION_INVOCATION_FAILED`, inspect the deployment's Function Logs for the Python traceback.
 
 ## API overview
 
