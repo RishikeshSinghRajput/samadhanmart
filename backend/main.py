@@ -17,8 +17,8 @@ from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from database import get_db
-from models import (
+from .database import get_db
+from .models import (
     Advocate,
     ActivityLog,
     Consultation,
@@ -28,8 +28,8 @@ from models import (
     PrescriptionOrder,
     User,
 )
-from notifications import dispatch_otp
-from schemas import (
+from .notifications import dispatch_otp
+from .schemas import (
     AdvocateOut,
     ActivityOut,
     AdminRequestOut,

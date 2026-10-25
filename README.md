@@ -21,20 +21,20 @@ To point to another SQL Server, set `SQLSERVER_CONNECTION_STRING` before startin
 
 ## 2. Start the backend
 
-From a PowerShell terminal in `backend`:
+From a PowerShell terminal in the workspace root:
 
 ```powershell
-..\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+.\.venv\Scripts\Activate.ps1
+pip install -r backend\requirements.txt
 $env:OTP_HASH_SECRET = (python -c "import secrets; print(secrets.token_urlsafe(48))")
 $env:SAMADHAN_EXPOSE_MOCK_OTP = "true"
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
+uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Generate `OTP_HASH_SECRET` locally; the API requires it to be at least 32 characters. To create an administrator, manually insert a row in `dbo.Users` using SSMS. First, from the `backend` directory, generate a password hash interactively:
+Generate `OTP_HASH_SECRET` locally; the API requires it to be at least 32 characters. To create an administrator, manually insert a row in `dbo.Users` using SSMS. From the workspace root, generate a password hash interactively:
 
 ```powershell
-python .\generate_admin_password_hash.py
+python .\backend\generate_admin_password_hash.py
 ```
 
 Copy the printed hash (never the password) into the SQL below, replacing the sample identity values and `<PASTE_HASH_HERE>`. This assigns admin status only to the manually entered account; the database check constraint enforces that `Role='admin'` and `IsAdmin=1` stay in sync.
