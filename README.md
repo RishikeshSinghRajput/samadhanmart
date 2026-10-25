@@ -21,14 +21,14 @@ To point to another SQL Server, set `SQLSERVER_CONNECTION_STRING` before startin
 
 ## 2. Start the backend
 
-From a PowerShell terminal in the workspace root:
+From a PowerShell terminal in `backend`:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-pip install -r backend\requirements.txt
+..\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 $env:OTP_HASH_SECRET = (python -c "import secrets; print(secrets.token_urlsafe(48))")
 $env:SAMADHAN_EXPOSE_MOCK_OTP = "true"
-uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Generate `OTP_HASH_SECRET` locally; the API requires it to be at least 32 characters. To create an administrator, manually insert a row in `dbo.Users` using SSMS. From the workspace root, generate a password hash interactively:
@@ -68,7 +68,7 @@ Visit the Vite URL (normally `http://localhost:5173`). Set `VITE_API_URL` before
 
 ## 4. Deploy on Vercel
 
-The repository root is configured to expose `backend.main:app` as the FastAPI entrypoint, and the root `requirements.txt` installs the backend dependencies. Configure these environment variables in the Vercel project before deploying:
+The `backend` service uses `backend` as its root and `main:app` as its FastAPI entrypoint; Vercel installs dependencies from `backend/requirements.txt`. The `frontend` service builds the Vite app from `frontend`. Configure these environment variables in the Vercel project before deploying:
 
 - `OTP_HASH_SECRET`: a unique random value of at least 32 characters. Generate it locally with `python -c "import secrets; print(secrets.token_urlsafe(48))"`; do not commit it.
 - `SQLSERVER_CONNECTION_STRING`: a connection string for a SQL Server instance reachable from Vercel. The local Windows-authentication default is not suitable for Vercel; use a hosted database and an appropriate SQL login.
